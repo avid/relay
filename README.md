@@ -11,9 +11,9 @@ code:
 func main() {
 	handler := relay.New()
 
-	handler.Push(doSomething1)
-	handler.Push(doSomething2)
-	handler.Push(doSomething3)
+	handler.Use(doSomething1)
+	handler.Use(doSomething2)
+	handler.Use(doSomething3)
 
 	fasthttp.ListenAndServe("127.0.0.1:80", handler.Handle)
 	c := make(chan bool)
