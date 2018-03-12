@@ -4,11 +4,13 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+// Relay represents common relay interface
 type Relay interface {
-	Push(mws ...Middleware)
+	Use(mws ...Middleware)
 	Handle(ctx *fasthttp.RequestCtx)
 }
 
+// New returns new relay instance
 func New() Relay {
 	impl := new(relayImpl)
 	impl.queue = make([]Middleware,0)
@@ -19,7 +21,7 @@ type relayImpl struct {
 	queue []Middleware
 }
 
-func (r *relayImpl) Push(mws ...Middleware) {
+func (r *relayImpl) Use(mws ...Middleware) {
 	r.queue = append(r.queue, mws...)
 }
 
