@@ -13,7 +13,7 @@ type Relay interface {
 // New returns new relay instance
 func New() Relay {
 	impl := new(relayImpl)
-	impl.queue = make([]Middleware,0)
+	impl.queue = make([]Middleware, 0)
 	return impl
 }
 
@@ -26,11 +26,22 @@ func (r *relayImpl) Use(mws ...Middleware) {
 }
 
 func (r *relayImpl) Handle(ctx *fasthttp.RequestCtx) {
+	//recover after panic
+	defer func() {
+		if r := recover(); r != nil {
+			setErrorResponse(ctx, "")
+		}
+	}()
+
 	runner := fork(ctx, r.queue)
 	err := runner.invoke()
 	if err != nil {
-		ctx.SetContentType("text/plain")
-		ctx.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.SetBodyString(err.Error())
+		setErrorResponse(ctx, err.Error())
 	}
+}
+
+func setErrorResponse(ctx *fasthttp.RequestCtx, msg string) {
+	ctx.SetContentType("text/plain")
+	ctx.SetStatusCode(fasthttp.StatusInternalServerError)
+	ctx.SetBodyString(msg)
 }
